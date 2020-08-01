@@ -1,6 +1,6 @@
 package com.google.ar.sceneform.rendering;
 
-import import androidx.annotation.Nullable;
+import androidx.annotation.Nullable;
 import com.google.android.filament.MaterialInstance;
 import com.google.android.filament.TextureSampler;
 

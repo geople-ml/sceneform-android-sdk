@@ -1,6 +1,6 @@
 package com.google.ar.sceneform;
 
-import import androidx.annotation.Nullable;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import android.view.MotionEvent;
 import com.google.ar.core.Pose;

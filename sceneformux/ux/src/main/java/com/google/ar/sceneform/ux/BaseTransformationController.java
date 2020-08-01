@@ -16,7 +16,7 @@
 package com.google.ar.sceneform.ux;
 
 import androidx.annotation.CallSuper;
-import import androidx.annotation.Nullable;
+import androidx.annotation.Nullable;
 import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.Node;
 

@@ -4,7 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
-import import androidx.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 
 import com.google.ar.sceneform.collision.Box;

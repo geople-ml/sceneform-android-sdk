@@ -1,6 +1,6 @@
 package com.google.ar.sceneform.utilities;
 
-import import androidx.annotation.Nullable;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 /**

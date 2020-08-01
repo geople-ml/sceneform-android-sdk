@@ -1,7 +1,7 @@
 package com.google.ar.sceneform;
 
 import androidx.annotation.CallSuper;
-import import androidx.annotation.Nullable;
+import androidx.annotation.Nullable;
 import com.google.ar.sceneform.utilities.AndroidPreconditions;
 import com.google.ar.sceneform.utilities.Preconditions;
 import java.util.ArrayList;

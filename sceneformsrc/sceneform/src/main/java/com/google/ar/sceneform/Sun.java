@@ -1,7 +1,7 @@
 package com.google.ar.sceneform;
 
 import androidx.annotation.ColorInt;
-import import androidx.annotation.Nullable;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.google.ar.sceneform.math.Quaternion;

@@ -1,7 +1,7 @@
 package com.google.ar.sceneform.rendering;
 
 import androidx.annotation.NonNull;
-import import androidx.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 import com.google.android.filament.Box;
 import com.google.android.filament.Entity;

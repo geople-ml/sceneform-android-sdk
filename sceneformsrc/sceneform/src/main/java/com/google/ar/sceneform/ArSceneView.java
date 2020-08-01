@@ -3,7 +3,7 @@ package com.google.ar.sceneform;
 import android.content.Context;
 import android.media.Image;
 
-import import androidx.annotation.Nullable;
+import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import android.util.AttributeSet;
 import android.util.Log;

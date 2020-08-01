@@ -1,6 +1,6 @@
 package com.google.ar.sceneform.rendering;
 
-import import androidx.annotation.Nullable;
+import androidx.annotation.Nullable;
 import com.google.android.filament.IndexBuffer;
 import com.google.android.filament.IndexBuffer.Builder.IndexType;
 import com.google.android.filament.VertexBuffer;

@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
-import import androidx.annotation.Nullable;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import com.google.android.filament.android.TextureHelper;
 

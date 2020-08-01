@@ -1,7 +1,7 @@
 package com.google.ar.sceneform;
 
 import android.media.Image;
-import import androidx.annotation.Nullable;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.MotionEvent;

@@ -3,7 +3,7 @@ package com.google.ar.sceneform.rendering;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
-import import androidx.annotation.Nullable;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import com.google.android.filament.MaterialInstance;
 
