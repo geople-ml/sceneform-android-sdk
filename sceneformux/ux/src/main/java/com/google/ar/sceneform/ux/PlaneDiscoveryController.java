@@ -15,7 +15,7 @@
  */
 package com.google.ar.sceneform.ux;
 
-import android.support.annotation.Nullable;
+import import androidx.annotation.Nullable;
 import android.view.View;
 
 /**
