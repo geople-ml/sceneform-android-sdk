@@ -37,6 +37,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnWindowFocusChangeListener;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -44,6 +46,7 @@ import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
+import com.google.ar.core.InstantPlacementPoint;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Session;
 import com.google.ar.core.Trackable;
@@ -75,7 +78,7 @@ public abstract class BaseArFragment extends Fragment
      * The callback will only be invoked once after a Session is initialized and before it is
      * resumed for the first time.
      *
-     * @see #setOnSessionInitializationListener(OnTapArPlaneListener)
+     * @see #setOnSessionInitializationListener(OnSessionInitializationListener)
      * @param session The ARCore Session.
      */
     void onSessionInitialization(Session session);
@@ -89,10 +92,24 @@ public abstract class BaseArFragment extends Fragment
      *
      * @see #setOnTapArPlaneListener(OnTapArPlaneListener)
      * @param hitResult The ARCore hit result that occurred when tapping the plane
-     * @param plane The ARCore Plane that was tapped
+     * @param plane The ARCore Plane that was tapped, null if InstantPlacement is Enabled
      * @param motionEvent the motion event that triggered the tap
      */
     void onTapPlane(HitResult hitResult, Plane plane, MotionEvent motionEvent);
+  }
+
+  /** Invoked on AR Scene Tap, when Instant Placement is enabled */
+  public interface OnTapInstantPlacementListener {
+    /**
+     * Called when an AR Scene is tapped and InstantPlacementMode is Enabled.
+     * The callback will only be invoked if no {@link com.google.ar.sceneform.Node} was tapped.
+     *
+     * @see #setOnTapInstantPlacementListener(OnTapInstantPlacementListener)
+     * @param hitResult The ARCore hit result that occurred when tapping the plane
+     * @param point Instant Placement point tapped, null if InstantPlacement is Disabled
+     * @param motionEvent the motion event that triggered the tap
+     */
+    void onTapScene(HitResult hitResult, InstantPlacementPoint point, MotionEvent motionEvent);
   }
 
   private static final int RC_PERMISSIONS = 1010;
@@ -107,6 +124,10 @@ public abstract class BaseArFragment extends Fragment
   private boolean canRequestDangerousPermissions = true;
   @Nullable private OnSessionInitializationListener onSessionInitializationListener;
   @Nullable private OnTapArPlaneListener onTapArPlaneListener;
+  @Nullable private OnTapInstantPlacementListener onTapInstantPlacementListener;
+
+  // create an interface for app
+  float approximateDistanceMeters = 3.0f;
 
   @SuppressWarnings({"initialization"})
   private final OnWindowFocusChangeListener onFocusListener =
@@ -151,6 +172,17 @@ public abstract class BaseArFragment extends Fragment
    */
   public void setOnTapArPlaneListener(@Nullable OnTapArPlaneListener onTapArPlaneListener) {
     this.onTapArPlaneListener = onTapArPlaneListener;
+  }
+
+  /**
+   * Registers a callback to be invoked when tapped on AR Scene.
+   * This will work only if InstantPlacementMode is Enabled.
+   * The callback will only be invoked if no {@link com.google.ar.sceneform.Node} was tapped.
+   *
+   * @param onTapInstantPlacementListener the {@link OnTapInstantPlacementListener} to attach
+   */
+  public void setOnTapInstantPlacementListener(@Nullable OnTapInstantPlacementListener onTapInstantPlacementListener) {
+    this.onTapInstantPlacementListener = onTapInstantPlacementListener;
   }
 
   @Override
@@ -476,20 +508,33 @@ public abstract class BaseArFragment extends Fragment
   
   protected abstract Set<Session.Feature> getSessionFeatures();
 
+  /**
+   * When the app is in focus, set it to full screen
+   * @param hasFocus When the app is in focus
+   */
   protected void onWindowFocusChanged(boolean hasFocus) {
     FragmentActivity activity = getActivity();
     if (hasFocus && activity != null) {
       // Standard Android full-screen functionality.
-      activity
-          .getWindow()
-          .getDecorView()
-          .setSystemUiVisibility(
-              View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                  | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                  | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                  | View.SYSTEM_UI_FLAG_FULLSCREEN
-                  | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+      if (Build.VERSION.SDK_INT < VERSION_CODES.R) {
+        activity
+                .getWindow()
+                .getDecorView()
+                .setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+      } else {
+        activity.getWindow().setDecorFitsSystemWindows(false);
+        WindowInsetsController controller = activity.getWindow().getInsetsController();
+        if(controller != null) {
+          controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
+          controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        }
+      }
       activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
   }
@@ -572,15 +617,29 @@ public abstract class BaseArFragment extends Fragment
 
     // Local variable for nullness static-analysis.
     OnTapArPlaneListener onTapArPlaneListener = this.onTapArPlaneListener;
+    OnTapInstantPlacementListener onTapInstantPlacementListener = this.onTapInstantPlacementListener;
 
-    if (frame != null && onTapArPlaneListener != null) {
-      if (motionEvent != null && frame.getCamera().getTrackingState() == TrackingState.TRACKING) {
-        for (HitResult hit : frame.hitTest(motionEvent)) {
-          Trackable trackable = hit.getTrackable();
-          if (trackable instanceof Plane && ((Plane) trackable).isPoseInPolygon(hit.getHitPose())) {
-            Plane plane = (Plane) trackable;
-            onTapArPlaneListener.onTapPlane(hit, plane, motionEvent);
-            break;
+    if (frame != null) {
+      if (onTapInstantPlacementListener != null) {
+        if (motionEvent != null && frame.getCamera().getTrackingState() == TrackingState.TRACKING) {
+          // Will return an empty list if InstantPlacement is Disabled.
+          List<HitResult> results =
+                  frame.hitTestInstantPlacement(motionEvent.getRawX(), motionEvent.getRawY(), approximateDistanceMeters);
+          if (!results.isEmpty()) {
+            // If InstantPlacement is Enabled, place object on point.
+            InstantPlacementPoint point = (InstantPlacementPoint) results.get(0).getTrackable();
+            onTapInstantPlacementListener.onTapScene(results.get(0), point, motionEvent);
+          }
+        }
+      } else if (onTapArPlaneListener != null) {
+        if (motionEvent != null && frame.getCamera().getTrackingState() == TrackingState.TRACKING) {
+          for (HitResult hit : frame.hitTest(motionEvent)) {
+            Trackable trackable = hit.getTrackable();
+            if (trackable instanceof Plane && ((Plane) trackable).isPoseInPolygon(hit.getHitPose())) {
+              Plane plane = (Plane) trackable;
+              onTapArPlaneListener.onTapPlane(hit, plane, motionEvent);
+              break;
+            }
           }
         }
       }
