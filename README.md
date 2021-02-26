@@ -1,7 +1,6 @@
-# Status: Archived
-This repository has been archived and is no longer maintained.
+# Status: Passively Maintained
+This repository is being maintained, but not actively.
 
-![status: inactive](https://img.shields.io/badge/status-inactive-red.svg)
 
 Sceneform SDK for Android
 =========================
