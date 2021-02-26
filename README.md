@@ -1,6 +1,25 @@
 # Status: Passively Maintained
 This repository is being maintained, but not actively.
 
+# Updates
+* androidx
+* ArCore 1.23
+* InstantPlacementMode 
+  * Enable in ARCore Config
+  ```
+  override fun getSessionConfiguration(session: Session?): Config {
+        val config =  super.getSessionConfiguration(session)
+        config.instantPlacementMode = Config.InstantPlacementMode.LOCAL_Y_UP
+        return config
+   }
+   ```
+   * Listen for onTapInstantPlacementListener
+   ```
+   arFragment.setOnTapInstantPlacementListener {
+                hitResult: HitResult, _: InstantPlacementPoint, _: MotionEvent ->
+                ...........
+   }
+   ```
 
 Sceneform SDK for Android
 =========================
